@@ -1,8 +1,10 @@
 import { useSyncExternalStore } from "react";
 
 const SESSION_KEY = "care-inventory-admin-session";
-// 데모 기본 비밀번호. 운영 전 반드시 변경하고, 이후 실제 인증 방식(구글시트 연동)으로 교체할 것.
-const ADMIN_PASSWORD = "admin1234";
+// 배포 시 Vercel 환경변수 VITE_ADMIN_PASSWORD를 반드시 설정할 것.
+// 설정하지 않으면 로컬 개발 편의를 위한 데모 비밀번호로 동작한다 (운영 배포 금지).
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "admin1234";
+export const isDemoPassword = !import.meta.env.VITE_ADMIN_PASSWORD;
 
 const listeners = new Set<() => void>();
 

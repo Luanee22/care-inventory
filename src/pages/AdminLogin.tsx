@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { PawPrint } from "lucide-react";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { loginAdmin, useAdminSession } from "../lib/auth";
+import { isDemoPassword, loginAdmin, useAdminSession } from "../lib/auth";
 
 export function AdminLogin() {
   const session = useAdminSession();
@@ -65,7 +65,11 @@ export function AdminLogin() {
           >
             로그인
           </button>
-          <p className="text-[11px] text-faint mt-4 text-center">데모 비밀번호: admin1234</p>
+          {isDemoPassword && (
+            <p className="text-[11px] text-warn mt-4 text-center">
+              데모 비밀번호(admin1234) 사용 중 · 배포 전 VITE_ADMIN_PASSWORD 환경변수를 설정하세요
+            </p>
+          )}
         </form>
       </div>
     </div>
