@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #EDEFFA;
+  --surface: #FFFFFF;
+  --surface-2: #F4F5FC;
+  --border: #DFE2F1;
+  --ink: #171B3D;
+  --ink-muted: #676E96;
+  --ink-faint: #9AA0C2;
+  --accent: #0EA394;
+  --accent-soft: #DCF3EF;
+  --accent-2: #6C5CE7;
+  --accent-2-soft: #EAE6FB;
+  --warn: #B4791C;
+  --warn-soft: #FBEEDA;
+  --critical: #C24343;
+  --critical-soft: #FBE4E4;
+  --chart-track: #E3E6F5;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0B1730;
+  --surface: #12213F;
+  --surface-2: #182A4C;
+  --border: #24365C;
+  --ink: #EAF0FF;
+  --ink-muted: #93A0C7;
+  --ink-faint: #64719B;
+  --accent: #34D6C4;
+  --accent-soft: #163A38;
+  --accent-2: #A796F5;
+  --accent-2-soft: #2A2454;
+  --warn: #E6B65C;
+  --warn-soft: #3A2E14;
+  --critical: #E68080;
+  --critical-soft: #3B1E1E;
+  --chart-track: #1E2F52;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans KR", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+::selection { background: var(--accent-soft); color: var(--accent); }
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
