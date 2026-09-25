@@ -7,29 +7,16 @@ import { formatDateTime } from "../../lib/format";
 type Row = {
   id: string;
   timestamp: string;
-  type: "resident-out" | "resident-in" | "office-out" | "office-in" | "asset-rent" | "asset-return";
+  type: "out" | "in";
   label: string;
   detail: string;
   actor: string;
 };
 
-const TYPE_LABEL: Record<Row["type"], string> = {
-  "resident-out": "어르신 반출",
-  "resident-in": "어르신 반입",
-  "office-out": "사무 반출",
-  "office-in": "사무 반입",
-  "asset-rent": "자산 대여",
-  "asset-return": "자산 반납",
-};
-
 const FILTERS: { key: "all" | Row["type"]; label: string }[] = [
   { key: "all", label: "전체" },
-  { key: "resident-out", label: "어르신 반출" },
-  { key: "resident-in", label: "어르신 반입" },
-  { key: "office-out", label: "사무 반출" },
-  { key: "office-in", label: "사무 반입" },
-  { key: "asset-rent", label: "자산 대여" },
-  { key: "asset-return", label: "자산 반납" },
+  { key: "out", label: "반출" },
+  { key: "in", label: "반입" },
 ];
 
 export function History() {
@@ -43,9 +30,9 @@ export function History() {
       out.push({
         id: l.id,
         timestamp: l.timestamp,
-        type: "resident-out",
+        type: "out",
         label: it?.name ?? "",
-        detail: `${l.boxes > 0 ? `${l.boxes}박스 ` : ""}${l.units}개 · ${l.location}`,
+        detail: `${l.units}개 · ${l.location}`,
         actor: l.staffName,
       });
     }
@@ -54,31 +41,9 @@ export function History() {
       out.push({
         id: l.id,
         timestamp: l.timestamp,
-        type: "resident-in",
+        type: "in",
         label: it?.name ?? "",
-        detail: `${l.boxes > 0 ? `${l.boxes}박스 ` : ""}${l.units}개`,
-        actor: l.recordedBy,
-      });
-    }
-    for (const l of db.officeLogs) {
-      const it = db.items.find((i) => i.id === l.itemId);
-      out.push({
-        id: l.id,
-        timestamp: l.timestamp,
-        type: l.direction === "in" ? "office-in" : "office-out",
-        label: it?.name ?? "",
-        detail: `${l.boxes > 0 ? `${l.boxes}박스 ` : ""}${l.units}개`,
-        actor: l.recordedBy,
-      });
-    }
-    for (const l of db.rentalLogs) {
-      const asset = db.assets.find((a) => a.id === l.assetId);
-      out.push({
-        id: l.id,
-        timestamp: l.timestamp,
-        type: l.action === "rent" ? "asset-rent" : "asset-return",
-        label: asset ? `${asset.code} ${asset.name}` : "",
-        detail: l.holder,
+        detail: `${l.boxes}박스`,
         actor: l.recordedBy,
       });
     }
@@ -108,12 +73,12 @@ export function History() {
 
       <Card title={`전체 이력 · ${filtered.length}건`} eyebrow="최신순">
         <div className="overflow-x-auto -mx-5 px-5">
-          <table className="w-full text-sm min-w-[560px]">
+          <table className="w-full text-sm min-w-[520px]">
             <thead>
               <tr className="text-left text-faint font-mono text-[11px] uppercase border-b border-border">
                 <th className="py-2 pr-4">시각</th>
                 <th className="py-2 pr-4">구분</th>
-                <th className="py-2 pr-4">품목 · 자산</th>
+                <th className="py-2 pr-4">품목</th>
                 <th className="py-2 pr-4">내용</th>
                 <th className="py-2">처리자</th>
               </tr>
@@ -123,8 +88,13 @@ export function History() {
                 <tr key={r.id} className="border-b border-border last:border-none">
                   <td className="py-2.5 pr-4 font-mono text-faint whitespace-nowrap">{formatDateTime(r.timestamp)}</td>
                   <td className="py-2.5 pr-4">
-                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface2 text-muted whitespace-nowrap">
-                      {TYPE_LABEL[r.type]}
+                    <span
+                      className={clsx(
+                        "px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap",
+                        r.type === "in" ? "bg-accent-soft text-accent" : "bg-accent2-soft text-accent2"
+                      )}
+                    >
+                      {r.type === "in" ? "반입" : "반출"}
                     </span>
                   </td>
                   <td className="py-2.5 pr-4 text-ink font-medium whitespace-nowrap">{r.label}</td>

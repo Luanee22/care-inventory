@@ -4,7 +4,6 @@ import { AdminLogin } from "./pages/AdminLogin";
 import { AdminLayout } from "./components/AdminLayout";
 import { Dashboard } from "./pages/admin/Dashboard";
 import { Inbound } from "./pages/admin/Inbound";
-import { Assets } from "./pages/admin/Assets";
 import { History } from "./pages/admin/History";
 import { Settings } from "./pages/admin/Settings";
 
@@ -16,7 +15,6 @@ export default function App() {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="inbound" element={<Inbound />} />
-        <Route path="assets" element={<Assets />} />
         <Route path="history" element={<History />} />
         <Route path="settings" element={<Settings />} />
       </Route>

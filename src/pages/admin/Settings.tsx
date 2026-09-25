@@ -2,7 +2,6 @@ import { useState } from "react";
 import clsx from "clsx";
 import { Card } from "../../components/Card";
 import { useDatabase, addStaff, setStaffActive, addItem, updateThreshold } from "../../lib/store";
-import type { ConsumableCategory } from "../../lib/types";
 
 export function Settings() {
   const db = useDatabase();
@@ -10,7 +9,6 @@ export function Settings() {
   const [staffRole, setStaffRole] = useState<"caregiver" | "admin">("caregiver");
 
   const [itemName, setItemName] = useState("");
-  const [itemCategory, setItemCategory] = useState<ConsumableCategory>("resident");
   const [unitsPerBox, setUnitsPerBox] = useState(50);
   const [threshold, setThreshold] = useState(2);
 
@@ -22,7 +20,7 @@ export function Settings() {
 
   function submitItem() {
     if (!itemName.trim()) return;
-    addItem(itemName.trim(), itemCategory, unitsPerBox, threshold);
+    addItem(itemName.trim(), unitsPerBox, threshold);
     setItemName("");
   }
 
@@ -69,13 +67,11 @@ export function Settings() {
           </div>
         </Card>
 
-        <Card title="소모품 경고 기준" eyebrow="박스 단위">
+        <Card title="재고 경고 기준" eyebrow="박스 단위">
           <ul className="space-y-3">
             {db.items.map((i) => (
               <li key={i.id} className="flex items-center justify-between text-sm">
-                <span className="text-ink font-medium">
-                  {i.name} <span className="text-xs text-faint font-mono">{i.category === "resident" ? "어르신" : "사무"}</span>
-                </span>
+                <span className="text-ink font-medium">{i.name}</span>
                 <input
                   type="number"
                   min={0}
@@ -88,22 +84,14 @@ export function Settings() {
           </ul>
         </Card>
 
-        <Card title="새 소모품 추가" eyebrow="어르신 · 사무" className="md:col-span-2">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card title="새 품목 추가" eyebrow="기저귀 · 물티슈" className="md:col-span-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <input
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
               placeholder="품목명"
               className="col-span-2 md:col-span-1 px-3.5 py-2.5 rounded-xl bg-surface2 border border-border text-ink outline-none focus:border-accent"
             />
-            <select
-              value={itemCategory}
-              onChange={(e) => setItemCategory(e.target.value as ConsumableCategory)}
-              className="px-3.5 py-2.5 rounded-xl bg-surface2 border border-border text-ink outline-none focus:border-accent"
-            >
-              <option value="resident">어르신 소모품</option>
-              <option value="office">사무 소모품</option>
-            </select>
             <input
               type="number"
               min={1}

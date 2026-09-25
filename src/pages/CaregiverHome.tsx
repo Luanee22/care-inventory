@@ -1,23 +1,21 @@
 import { useMemo, useState } from "react";
-import { Check, ChevronLeft, Minus, Plus, User } from "lucide-react";
+import { Check, ChevronLeft, User } from "lucide-react";
 import clsx from "clsx";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useDatabase, logOutbound, editOutboundLog, isEditable } from "../lib/store";
 import type { Location } from "../lib/types";
-import { formatDateTime, timeAgo } from "../lib/format";
+import { timeAgo } from "../lib/format";
 
 type Step = "name" | "item" | "qty" | "location" | "done";
 
 export function CaregiverHome() {
   const db = useDatabase();
   const caregivers = db.staff.filter((s) => s.role === "caregiver" && s.active);
-  const residentItems = db.items.filter((i) => i.category === "resident");
 
   const [step, setStep] = useState<Step>("name");
   const [staffName, setStaffName] = useState("");
   const [itemId, setItemId] = useState("");
-  const [boxes, setBoxes] = useState(0);
-  const [units, setUnits] = useState(1);
+  const [units, setUnits] = useState(0);
   const [location, setLocation] = useState<Location | "">("");
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
 
@@ -32,8 +30,7 @@ export function CaregiverHome() {
     setStep("name");
     setStaffName("");
     setItemId("");
-    setBoxes(0);
-    setUnits(1);
+    setUnits(0);
     setLocation("");
     setEditingLogId(null);
   }
@@ -41,9 +38,9 @@ export function CaregiverHome() {
   function confirm() {
     if (!item || !location) return;
     if (editingLogId) {
-      editOutboundLog(editingLogId, boxes, units);
+      editOutboundLog(editingLogId, units);
     } else {
-      logOutbound(item.id, staffName, boxes, units, location);
+      logOutbound(item.id, staffName, units, location);
     }
     setStep("done");
   }
@@ -52,7 +49,6 @@ export function CaregiverHome() {
     const log = db.outboundLogs.find((l) => l.id === logId);
     if (!log) return;
     setItemId(log.itemId);
-    setBoxes(log.boxes);
     setUnits(log.units);
     setLocation(log.location);
     setEditingLogId(log.id);
@@ -62,7 +58,7 @@ export function CaregiverHome() {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
       <header className="flex items-center justify-between px-6 py-4">
-        <div className="font-extrabold text-lg text-ink">기저귀 · 물품 반출</div>
+        <div className="font-extrabold text-lg text-ink">기저귀 반출</div>
         <ThemeToggle />
       </header>
 
@@ -95,13 +91,12 @@ export function CaregiverHome() {
             <div>
               <StepHeader label={`${staffName}님 · 품목 선택`} onBack={() => setStep("name")} />
               <div className="grid grid-cols-2 gap-4 mt-5">
-                {residentItems.map((i) => (
+                {db.items.map((i) => (
                   <button
                     key={i.id}
                     onClick={() => {
                       setItemId(i.id);
-                      setBoxes(0);
-                      setUnits(1);
+                      setUnits(0);
                       setStep("qty");
                     }}
                     className="py-8 rounded-2xl bg-surface border border-border shadow-card active:scale-[0.97] transition-transform"
@@ -116,14 +111,46 @@ export function CaregiverHome() {
           {step === "qty" && item && (
             <div>
               <StepHeader label={item.name} onBack={() => setStep("item")} />
-              <div className="mt-6 space-y-5">
-                <QtyRow label="박스" value={boxes} onChange={setBoxes} />
-                <QtyRow label="낱개" value={units} onChange={setUnits} />
+              <div className="mt-8 rounded-2xl bg-surface border border-border shadow-card p-8 text-center">
+                <p className="text-6xl font-extrabold text-ink tabular mb-1">{units}</p>
+                <p className="text-sm text-muted mb-7">개</p>
+                <div className="grid grid-cols-4 gap-3">
+                  <button
+                    onClick={() => setUnits((u) => Math.max(0, u - 1))}
+                    disabled={units === 0}
+                    className="py-4 rounded-xl bg-surface2 text-ink text-lg font-bold disabled:opacity-40 active:scale-95 transition-transform"
+                  >
+                    −1
+                  </button>
+                  <button
+                    onClick={() => setUnits((u) => u + 1)}
+                    className="py-4 rounded-xl bg-accent-soft text-accent text-lg font-bold active:scale-95 transition-transform"
+                  >
+                    +1
+                  </button>
+                  <button
+                    onClick={() => setUnits((u) => u + 5)}
+                    className="py-4 rounded-xl bg-accent-soft text-accent text-lg font-bold active:scale-95 transition-transform"
+                  >
+                    +5
+                  </button>
+                  <button
+                    onClick={() => setUnits((u) => u + 10)}
+                    className="py-4 rounded-xl bg-accent-soft text-accent text-lg font-bold active:scale-95 transition-transform"
+                  >
+                    +10
+                  </button>
+                </div>
+                {units > 0 && (
+                  <button onClick={() => setUnits(0)} className="mt-5 text-xs font-semibold text-faint">
+                    초기화
+                  </button>
+                )}
               </div>
               <button
-                disabled={boxes === 0 && units === 0}
+                disabled={units === 0}
                 onClick={() => setStep("location")}
-                className="mt-8 w-full py-5 rounded-2xl bg-accent text-white text-lg font-bold disabled:opacity-40 active:scale-[0.98] transition-transform"
+                className="mt-6 w-full py-5 rounded-2xl bg-accent text-white text-lg font-bold disabled:opacity-40 active:scale-[0.98] transition-transform"
               >
                 다음
               </button>
@@ -166,8 +193,7 @@ export function CaregiverHome() {
               </div>
               <p className="text-xl font-bold text-ink mb-1">기록되었습니다</p>
               <p className="text-muted mb-8">
-                {item?.name} · {boxes > 0 ? `${boxes}박스 ` : ""}
-                {units}개 · {location}
+                {item?.name} · {units}개 · {location}
               </p>
               <button
                 onClick={reset}
@@ -195,7 +221,6 @@ export function CaregiverHome() {
                       <div className="text-ink">
                         <span className="font-semibold">{it?.name}</span>{" "}
                         <span className="text-muted">
-                          {l.boxes > 0 ? `${l.boxes}박스 ` : ""}
                           {l.units}개 · {l.location}
                         </span>
                       </div>
@@ -226,29 +251,6 @@ function StepHeader({ label, onBack }: { label: string; onBack: () => void }) {
         <ChevronLeft size={18} />
       </button>
       <p className="text-lg font-bold text-ink">{label}</p>
-    </div>
-  );
-}
-
-function QtyRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex items-center justify-between px-5 py-4 rounded-2xl bg-surface border border-border shadow-card">
-      <span className="text-base font-semibold text-ink">{label}</span>
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => onChange(Math.max(0, value - 1))}
-          className="w-11 h-11 grid place-items-center rounded-full bg-surface2 text-ink active:scale-95 transition-transform"
-        >
-          <Minus size={18} />
-        </button>
-        <span className="w-10 text-center text-xl font-extrabold text-ink tabular">{value}</span>
-        <button
-          onClick={() => onChange(value + 1)}
-          className="w-11 h-11 grid place-items-center rounded-full bg-accent text-white active:scale-95 transition-transform"
-        >
-          <Plus size={18} />
-        </button>
-      </div>
     </div>
   );
 }

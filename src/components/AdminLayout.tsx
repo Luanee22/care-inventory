@@ -6,8 +6,7 @@ import { logoutAdmin, useAdminSession } from "../lib/auth";
 
 const TABS = [
   { to: "/admin", label: "대시보드", end: true },
-  { to: "/admin/inbound", label: "반입 · 사무소모품" },
-  { to: "/admin/assets", label: "자산" },
+  { to: "/admin/inbound", label: "반입" },
   { to: "/admin/history", label: "이력 · 통계" },
   { to: "/admin/settings", label: "관리" },
 ];
